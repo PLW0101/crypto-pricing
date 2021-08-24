@@ -7,14 +7,7 @@ function App() {
   const [loggedin, setloggedin] = useState(false);
   useEffect(() => {
     console.log("Hi");
-    fetch(
-      `http://0.0.0.0:8080/pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=20&convert=EUR`,
-      {
-        headers: {
-          "X-CMC_PRO_API_KEY": "3484a1fc-bf64-4206-9f73-2592b24719df",
-        },
-      }
-    ) //async
+    fetch(`http://localhost:8080/prices`) //async
       .then((res) => res.json())
       .then((res) => {
         console.log(res);
@@ -22,6 +15,9 @@ function App() {
       });
   }, []);
   console.log(data);
+  //TODO save the trheshold value somewhere
+  //TODO make a interval which checks the price all 10 minues
+  //TODO when the threshold is undergone trigger a notification (mail/telegram)
   return (
     <div className="App">
       Hello you are {loggedin ? " logged in" : " logged out"}
