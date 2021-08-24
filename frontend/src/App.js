@@ -12,7 +12,7 @@ function App() {
       {
         headers: {
           "X-CMC_PRO_API_KEY": "3484a1fc-bf64-4206-9f73-2592b24719df",
-        }
+        },
       }
     ) //async
       .then((res) => res.json())
@@ -25,13 +25,38 @@ function App() {
   return (
     <div className="App">
       Hello you are {loggedin ? " logged in" : " logged out"}
-      <button onClick={() => setloggedin(!loggedin)}>{loggedin ? " log out" : " login"}</button>
-      {data.map((currency) => (
-        <div>
-          <h1>{currency.name}</h1>
-          Price: <code>{currency.quote.EUR.price.toFixed(5)}</code> Euro
-        </div>
-      ))}
+      <button onClick={() => setloggedin(!loggedin)}>
+        {loggedin ? " log out" : " login"}
+      </button>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Currency</th>
+          
+            <th scope="col">Price</th>
+            <th scope="col">Threshold</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((currency) => (
+            <tr>
+              <th scope="row">{currency.name}</th>
+              <td><code>{currency.quote.EUR.price.toFixed(5)}</code></td>
+              <td><div className="input-group mb-3">
+                <span className="input-group-text">$</span>
+                <input
+                  type="text"
+                  className="form-control"
+                  aria-label="Amount (to the nearest dollar)"
+                />
+                <span className="input-group-text">.00</span>
+              </div></td>
+              
+              
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
