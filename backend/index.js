@@ -8,6 +8,7 @@ const port = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json()); //Used to parse JSON bodies
 app.use(express.urlencoded()); //Parse URL-encoded bodies
+const dir=`currencyThreshold`
 
 app.get("/prices", async (req, res) => {
   //TODO the coin price api call
@@ -20,7 +21,12 @@ app.get("/prices", async (req, res) => {
         },
       }
     );
-    res.json(response.data);
+    let currencies = []
+    fs.readdirSync(dir).forEach(file => {
+      const content = fs.readFileSync(dir + `/` + file, {encoding: 'utf-8'})
+      currencies.push({currency: file.replace("_threshold_price.txt",""), value: content})
+    });
+    res.json({currencies: currencies, prices: response.data});
   } catch (error) {
     console.error(error);
     res.json(error);
@@ -30,7 +36,6 @@ console.log(process.env.API_KEY);
 
 app.post("/setthreshhold", async (req, res) => {
   try {
-    const dir=`currencyThreshold`
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir, { recursive: true });
     }

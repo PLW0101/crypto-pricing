@@ -11,7 +11,7 @@ function App() {
       .then((res) => res.json())
       .then((res) => {
         console.log(res);
-        setdata(res.data);
+        setdata(res);
       });
   }, []);
   console.log(data);
@@ -25,7 +25,7 @@ function App() {
       <button onClick={() => setloggedin(!loggedin)}>
         {loggedin ? " log out" : " login"}
       </button>
-      <table class="table">
+      <table class="table text-start">
         <thead>
           <tr>
             <th scope="col">Currency</th>
@@ -34,16 +34,16 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {data.map((currency) => (
-            <tr>
-              <th scope="row">{currency.name}</th>
-              <td>
-                <code>{currency.quote.EUR.price.toFixed(5)}</code>
-              </td>
-              <td>
-                <div className="input-group mb-3">
-                  <span className="input-group-text">$</span>
+          {data.prices &&
+            data.prices.data.map((currency) => (
+              <tr>
+                <th scope="row">{currency.name}</th>
+                <td>
+                  <code>{currency.quote.EUR.price.toFixed(5)}</code>
+                </td>
+                <td>
                   <form
+                    className={`d-flex`}
                     onSubmit={(e) => {
                       e.preventDefault();
                       console.log(e.target.elements[0].value);
@@ -52,11 +52,11 @@ function App() {
                         method: "POST",
                         body: JSON.stringify({
                           currency: currency.name,
-                          value: e.target.elements[0].value
+                          value: e.target.elements[0].value,
                         }),
                         headers: {
-                          "content-type": "application/json"
-                        }
+                          "content-type": "application/json",
+                        },
                       })
                         .then((res) => res.json())
                         .then((res) => {
@@ -64,20 +64,30 @@ function App() {
                         });
                     }}
                   >
-                    <input
-                      type="text"
-                      className="form-control"
-                      aria-label="Amount (to the nearest dollar)"
-                    />
-                    <button className={`btn btn-success`} type="submit">
-                      Save
-                    </button>
+                    <div className="input-group mb-3">
+                      <span className="input-group-text">EUR</span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        defaultValue={
+                          data.currencies.find(
+                            (c) => c.currency === currency.name
+                          )
+                            ? data.currencies.find(
+                                (c) => c.currency === currency.name
+                              ).value
+                            : 0
+                        }
+                        aria-label="Amount (to the nearest dollar)"
+                      />
+                      <button className={`btn btn-success`} type="submit">
+                        Save
+                      </button>
+                    </div>
                   </form>
-                  <span className="input-group-text">.00</span>
-                </div>
-              </td>
-            </tr>
-          ))}
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
