@@ -1,9 +1,10 @@
+require('dotenv').config()
 const express = require("express");
 var cors = require("cors");
 const fs = require("fs");
 const axios = require("axios");
 const app = express();
-const port = 8080;
+const port = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json()); //Used to parse JSON bodies
 app.use(express.urlencoded()); //Parse URL-encoded bodies
@@ -15,7 +16,7 @@ app.get("/prices", async (req, res) => {
       "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest?start=1&limit=20&convert=EUR",
       {
         headers: {
-          "X-CMC_PRO_API_KEY": "3484a1fc-bf64-4206-9f73-2592b24719df",
+          "X-CMC_PRO_API_KEY": process.env.API_KEY,
         },
       }
     );
@@ -25,6 +26,7 @@ app.get("/prices", async (req, res) => {
     res.json(error);
   }
 });
+console.log(process.env.API_KEY);
 
 app.post("/setthreshhold", async (req, res) => {
   try {
