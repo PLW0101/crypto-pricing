@@ -1,3 +1,4 @@
 node_modules
 currencyThreshold
 .env
+.vercel

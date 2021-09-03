@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import "./App.css";
 import React, { useEffect, useState } from "react"; // import state and effekt hooks
 
@@ -7,7 +6,7 @@ function App() {
   const [loggedin, setloggedin] = useState(false);
   useEffect(() => {
     console.log("Hi");
-    fetch(`http://localhost:8080/prices`) //async
+    fetch(`${process.env.REACT_APP_API}/prices`) //async
       .then((res) => res.json())
       .then((res) => {
         console.log(res);
@@ -48,7 +47,7 @@ function App() {
                       e.preventDefault();
                       console.log(e.target.elements[0].value);
                       //TODO perform a post request to a new backend endpoint
-                      fetch(`http://localhost:8080/setthreshhold`, {
+                      fetch(`${process.env.REACT_APP_API}/setthreshhold`, {
                         method: "POST",
                         body: JSON.stringify({
                           currency: currency.name,

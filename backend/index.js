@@ -74,7 +74,7 @@ setInterval(async () => {
       console.log(localSavedCurrency.currency + " you shall buy now!!!!");
       try {
         const response = await axios.post(
-          `https://api.telegram.org/${process.env.TELEGRAM_API_KEY}/sendMessage`,{chat_id: 1940166204, text: localSavedCurrency.currency + " you shall buy now!!!!"});
+          `https://api.telegram.org/${process.env.TELEGRAM_API_KEY}/sendMessage`,{chat_id: process.env.CHAT_ID, text: localSavedCurrency.currency + " you shall buy now!!!!"});
         
       } catch (error) {
         console.log(error)
@@ -84,7 +84,7 @@ setInterval(async () => {
     }
   });
   console.log("    ");
-}, 5000);
+}, process.env.INTERVAL);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
