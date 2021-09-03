@@ -5,6 +5,19 @@ const fs = require("fs");
 const axios = require("axios");
 const app = express();
 const port = process.env.PORT || 8080;
+const mongoose = require('mongoose');
+
+main().catch(err => console.log(err));
+
+async function main() {
+  await mongoose.connect('mongodb://localhost:27017/crypto');
+}
+
+const cryptoSchema = new mongoose.Schema({
+  name: String,
+  price: Number
+});
+const Crypto = mongoose.model('Crypto', cryptoSchema);
 app.use(cors());
 app.use(express.json()); //Used to parse JSON bodies
 app.use(express.urlencoded()); //Parse URL-encoded bodies
@@ -49,14 +62,9 @@ app.get("/prices", async (req, res) => {
 
 app.post("/setthreshhold", async (req, res) => {
   try {
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const fileWriteResponse = fs.writeFileSync(
-      `${dir}/${req.body.currency}_threshold_price.txt`,
-      req.body.value
-    );
-    res.json({ message: "success" });
+    let cryptoToSave = new Crypto({name: req.body.currency, price: req.body.value})
+    await cryptoToSave.save()
+    res.json({ message: `successfully saved ${req.body.currency}` });
   } catch (err) {
     console.error(err);
   }
