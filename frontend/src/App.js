@@ -5,19 +5,13 @@ function App() {
   const [data, setdata] = useState([]);
   const [loggedin, setloggedin] = useState(false);
   useEffect(() => {
-    console.log("Hi");
     fetch(`${process.env.REACT_APP_API}/prices`) //async
       .then((res) => res.json())
-      .then((res) => {
-        console.log(res);
+      .then((res) => {        
         setdata(res);
       });
   }, []);
-  console.log(data);
-  //TODO save the trheshold value somewhere
-  // send the number while typing or on button click to the backend and store it in a file name like the currency
-  //TODO make a interval which checks the price all 10 minues
-  //TODO when the threshold is undergone trigger a notification (mail/telegram)
+  
   return (
     <div className="App">
       Hello you are {loggedin ? " logged in" : " logged out"}
