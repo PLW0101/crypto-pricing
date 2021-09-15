@@ -64,11 +64,11 @@ function App() {
                         className="form-control"
                         defaultValue={
                           data.currencies.find(
-                            (c) => c.currency === currency.name
+                            (c) => c.name === currency.name
                           )
                             ? data.currencies.find(
-                                (c) => c.currency === currency.name
-                              ).value
+                                (c) => c.name === currency.name
+                              ).price
                             : 0
                         }
                         aria-label="Amount (to the nearest dollar)"
