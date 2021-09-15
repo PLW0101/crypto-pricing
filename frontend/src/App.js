@@ -2,7 +2,7 @@ import "./App.css";
 import React, { useEffect, useState } from "react"; // import state and effekt hooks
 
 function App() {
-  const [data, setdata] = useState([]);
+  const [data, setdata] = useState({});
   const [loggedin, setloggedin] = useState(false);
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API}/prices`) //async
@@ -11,7 +11,11 @@ function App() {
         setdata(res);
       });
   }, []);
-  
+  const sortBy = (e) => {
+    let cryptosClone = {...data}
+    cryptosClone.prices.data = cryptosClone.prices.data.sort((a, b) => a.quote.EUR.price > b.quote.EUR.price)
+    setdata(cryptosClone)
+  }
   return (
     <div className="App">
       Hello you are {loggedin ? " logged in" : " logged out"}
@@ -21,10 +25,10 @@ function App() {
       <table class="table text-start">
         <thead>
           <tr>
-            <th scope="col">Currency</th>
-            <th scope="col">Price</th>
-            <th scope="col">Growth</th>
-            <th scope="col">Threshold</th>
+            <th onClick={(e) => sortBy(e)} scope="col">Currency</th>
+            <th onClick={(e) => sortBy(e)} scope="col">Price</th>
+            <th onClick={(e) => sortBy(e)} scope="col">Growth</th>
+            <th onClick={(e) => sortBy(e)} scope="col">Threshold</th>
           </tr>
         </thead>
         <tbody>
