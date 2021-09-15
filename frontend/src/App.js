@@ -12,9 +12,16 @@ function App() {
       });
   }, []);
   const sortBy = (e) => {
-    let cryptosClone = {...data}
-    cryptosClone.prices.data = cryptosClone.prices.data.sort((a, b) => a.quote.EUR.price > b.quote.EUR.price)
-    setdata(cryptosClone)
+    const columnName = e.target.innerText
+    let dataClone = {...data}
+    if(columnName === "Price"){
+      dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.price > b.quote.EUR.price)
+    }else if(columnName === "Currency") {
+      dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.name > b.name)
+    } else {
+      dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.percent_change_1h > b.quote.EUR.percent_change_1h)
+    }
+    setdata(dataClone)
   }
   return (
     <div className="App">
