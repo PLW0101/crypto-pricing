@@ -7,19 +7,31 @@ function App() {
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API}/prices`) //async
       .then((res) => res.json())
-      .then((res) => {        
+      .then((res) => {
         setdata(res);
       });
   }, []);
   const sortBy = (e) => {
     const columnName = e.target.innerText
-    let dataClone = {...data}
-    if(columnName === "Price"){
-      dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.price > b.quote.EUR.price)
-    }else if(columnName === "Currency") {
-      dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.name > b.name)
+    let dataClone = { ...data }
+    if (columnName === "Price") {
+      if (dataClone.prices.data[0].quote.EUR.price < dataClone.prices.data[dataClone.prices.data.length - 1].quote.EUR.price) {
+        dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.price < b.quote.EUR.price)
+      } else {
+        dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.price > b.quote.EUR.price)
+      }
+    } else if (columnName === "Currency") {
+      if (dataClone.prices.data[0].name < dataClone.prices.data[dataClone.prices.data.length - 1].name) {
+        dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.name < b.name)
+      } else {
+        dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.name > b.name)
+      }
     } else {
-      dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.percent_change_1h > b.quote.EUR.percent_change_1h)
+      if (dataClone.prices.data[0].quote.EUR.percent_change_1h < dataClone.prices.data[dataClone.prices.data.length - 1].quote.EUR.percent_change_1h)  {
+        dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.percent_change_1h < b.quote.EUR.percent_change_1h)
+      } else {
+        dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.percent_change_1h > b.quote.EUR.percent_change_1h)
+      }
     }
     setdata(dataClone)
   }
@@ -82,8 +94,8 @@ function App() {
                             (c) => c.name === currency.name
                           )
                             ? data.currencies.find(
-                                (c) => c.name === currency.name
-                              ).price
+                              (c) => c.name === currency.name
+                            ).price
                             : 0
                         }
                         aria-label="Amount (to the nearest dollar)"
