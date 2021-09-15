@@ -23,6 +23,7 @@ function App() {
           <tr>
             <th scope="col">Currency</th>
             <th scope="col">Price</th>
+            <th scope="col">Growth</th>
             <th scope="col">Threshold</th>
           </tr>
         </thead>
@@ -33,6 +34,9 @@ function App() {
                 <th scope="row">{currency.name}</th>
                 <td>
                   <code>{currency.quote.EUR.price.toFixed(5)}</code>
+                </td>
+                <td>
+                  <code>{currency.quote.EUR.percent_change_1h.toFixed(2)}%</code>
                 </td>
                 <td>
                   <form
