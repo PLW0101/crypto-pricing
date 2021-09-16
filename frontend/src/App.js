@@ -41,6 +41,29 @@ function App() {
       <button onClick={() => setloggedin(!loggedin)}>
         {loggedin ? " log out" : " login"}
       </button>
+      <form onSubmit={(e)=>  {
+        e.preventDefault()
+        const payload = {
+          email: e.target.elements.email.value,
+          password: e.target.elements.password.value
+        }
+        console.log(payload)
+        fetch(`${process.env.REACT_APP_API}/register`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: {
+            "content-type": "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            console.log(res);
+          });
+      }}>
+        <input type="email" placeholder="email" name="email"/>
+        <input type="password" placeholder="password" name="password"/>
+        <button type="submit">Login</button>
+      </form>
       <table class="table text-start">
         <thead>
           <tr>

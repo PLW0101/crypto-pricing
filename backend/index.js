@@ -2,6 +2,8 @@ require("dotenv").config(); // use enviroment variables coming from a .env file.
 const express = require("express");
 var cors = require("cors"); // Since our frontend runs on a different port than the backend, we need to deactivate CORS on the server (here). Because of security this is usually blocked. Requests from eg. Facebook.com, should not go to google.com (could be risky)
 const axios = require("axios"); // Library to make HTTP request easier
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const app = express(); // Initatinate our express app
 const port = process.env.PORT || 8080; // When there is a environemnt variable called PORT - use it, otherwise fallback to 8080
 const mongoose = require('mongoose'); // ORM (object relational model) layer to communicate with the operating system agnostic mongodb. Translates mongo-language into javascript.
@@ -17,7 +19,11 @@ const cryptoSchema = new mongoose.Schema({ // we define how our data looks like.
   price: Number // mongodb is strictly typed. Eg. if you try to save a price with the value "hello", mongo tells you that price should NOT bet a string, it should be a Number
 });
 const Crypto = mongoose.model('Crypto', cryptoSchema); //Instatinate the Model from the Schema. With this Object (Crypto) you will make your database transactions. Like: Crptyo.save(), Crypto.new(), Crypto.removeAll()
-
+const userSchema = new mongoose.Schema({ 
+  email: String, 
+  password: String
+});
+const User = mongoose.model('User', userSchema); 
 // Middlewares - tell express to use certain libraries or configuration what you need for your app
 app.use(cors()); // Tell express to ignore the CORS security feature
 app.use(express.json()); //Used to parse JSON bodies
@@ -72,7 +78,18 @@ app.post("/setthreshhold", async (req, res) => { // define a post route with the
     console.error(err);
   }
 });
-
+app.post("/register", async (req, res) => {
+  let userToRegister = await User.findOne({ email: req.body.email })
+  if (userToRegister) {
+    res.json({ message: ` ${req.body.email} already registered` });
+  } else {
+      bcrypt.hash(req.body.password, saltRounds,async function(err, hash) {
+        // Store hash in your password DB.
+        await User.create({email: req.body.email, password: hash})
+        res.json({ message: `successfully saved ${req.body.email}` });
+    });
+  }
+})
 setInterval(async () => {
   const response = await getPricesFromAPI();
   const thresholds = await getSavedThresholds();
