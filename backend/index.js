@@ -24,7 +24,7 @@ app.use(express.json()); //Used to parse JSON bodies
 app.use(express.urlencoded()); //Parse URL-encoded bodies
 
 app.use((req, res, next) => { // Define a express middleware that logs the req.method, the date and the path
-  console.log("Exress got a ", req.method, " request at "  + Date.now() + " from " + req.url)
+  console.log("Exress got a ", req.method, " request at " + Date.now() + " from " + req.url)
   next() // tell express not to stop here, tell it to continue with the next middlware/route/stuff/ whatever
 })
 
@@ -60,7 +60,12 @@ app.get("/prices", async (req, res) => { // define a get route with the /prices 
 
 app.post("/setthreshhold", async (req, res) => { // define a post route with the /setthreshol path: POST http://localhost:8080/setthreshold
   try {
-    let cryptoToSave = new Crypto({name: req.body.currency, price: req.body.value}) // receive the post body and create a new database record with the values.
+    let cryptoToSave = await Crypto.findOne({ name: req.body.currency })
+    if (cryptoToSave) {
+      cryptoToSave.price = req.body.value
+    } else {
+      cryptoToSave = new Crypto({ name: req.body.currency, price: req.body.value }) // receive the post body and create a new database record with the values.
+    }
     await cryptoToSave.save() //save the database record. Its async - you need to wait. You want to make your code be blocking the next operation before continueing
     res.json({ message: `successfully saved ${req.body.currency}` });
   } catch (err) {
@@ -79,8 +84,8 @@ setInterval(async () => {
       console.log(localSavedCurrency.name + " you shall buy now!!!!");
       try {
         const response = await axios.post(
-          `https://api.telegram.org/${process.env.TELEGRAM_API_KEY}/sendMessage`,{chat_id: process.env.CHAT_ID, text: localSavedCurrency.currency + " you shall buy now!!!!"});
-        
+          `https://api.telegram.org/${process.env.TELEGRAM_API_KEY}/sendMessage`, { chat_id: process.env.CHAT_ID, text: localSavedCurrency.currency + " you shall buy now!!!!" });
+
       } catch (error) {
         console.log(error)
       }
