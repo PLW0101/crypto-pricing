@@ -5,11 +5,11 @@ function App() {
   const [data, setdata] = useState({});
   const [loggedin, setloggedin] = useState(false);
   useEffect(() => {
-    const existingToken = localStorage.getItem('crypto-token')
-    if(existingToken){
+    const existingToken = localStorage.getItem('crypto-token') // check if there is a token, because /prices is a protected endpoint and should not be queried if you are not logged in (no token present)
+    if(existingToken){ // jjust fetch to the protected endpoint if we are logged in
       fetch(`${process.env.REACT_APP_API}/prices`, {
         headers: {
-          "Authorization": existingToken
+          "Authorization": existingToken // since the backend is expecting a authenticated request, we have to provide the fetch with a authorization header
         }
       }) //async
         .then((res) => res.json())
@@ -96,8 +96,7 @@ function App() {
           .then((res) => res.json())
           .then((res) => {
             console.log(res);
-            //TODO receive valid and fresh JWT token and save it in the localStorage
-            if(res.token){
+            if(res.token){ // if the backend issued successfully a token, save it locally in the browser (localStorage, or cookie or whatever)
               localStorage.setItem("crypto-token", res.token)
             }
           });

@@ -56,10 +56,10 @@ const getSavedThresholds = async () => {
 
 app.get("/prices", async (req, res) => { // define a get route with the /prices path: http://localhost:8080/prices
   try { // opens a try/catch block which helps us with handling errors gracefully
-    let token = req.headers.authorization
-    var decoded = jwt.verify(token, 'super_secure_hash_to_harden_the_token');
+    let token = req.headers.authorization // get the token out of the req header (where you send it with fetch)
+    var decoded = jwt.verify(token, 'super_secure_hash_to_harden_the_token'); // check if the token signature is valid - otherwise throw error and jump in catch statement
     console.log(`The decoded token is`, decoded)
-    if (token !== "") {
+    if (token !== "") { // if token is present and valid respond with data to frontend
       const response = await getPricesFromAPI();
       const currencies = await getSavedThresholds();
       res.json({ currencies: currencies, prices: response.data });
@@ -99,17 +99,17 @@ app.post("/register", async (req, res) => {
   }
 })
 app.post("/login", async (req, res) => {
-  let userToLogin = await User.findOne({ email: req.body.email })
+  let userToLogin = await User.findOne({ email: req.body.email }) // somebody wants to login and we try to find this user by email
   if (userToLogin) {
-    bcrypt.compare(req.body.password, userToLogin.password, function (err, bcryptRes) {
+    bcrypt.compare(req.body.password, userToLogin.password, function (err, bcryptRes) { // we have a user in the DB and a user that wants to login. Bcrypt can compare a plaintext password (req.body.password) with the hash that we saved in the DB
       if (err) {
         console.error(err)
       }
-      if (bcryptRes) {
+      if (bcryptRes) { // If there is no error, lets create a token with a small payload ({ email: userToLogin.email }) and a secure key (like salt)
         console.log(`Pw match`)
-        var token = jwt.sign({ email: userToLogin.email }, 'super_secure_hash_to_harden_the_token');
+        var token = jwt.sign({ email: userToLogin.email }, 'super_secure_hash_to_harden_the_token'); // creates a token with a payload and private_key
         console.log(`token`, token)
-        return res.json({ token });
+        return res.json({ token }); // send token back to client (react app)
         // TODO generate a valid and fresh JWT token and respond it to the user
       } else {
         console.log(`Pw DO NOT match`)
