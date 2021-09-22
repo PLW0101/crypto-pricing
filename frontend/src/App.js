@@ -27,7 +27,7 @@ function App() {
         dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.name > b.name)
       }
     } else {
-      if (dataClone.prices.data[0].quote.EUR.percent_change_1h < dataClone.prices.data[dataClone.prices.data.length - 1].quote.EUR.percent_change_1h)  {
+      if (dataClone.prices.data[0].quote.EUR.percent_change_1h < dataClone.prices.data[dataClone.prices.data.length - 1].quote.EUR.percent_change_1h) {
         dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.percent_change_1h < b.quote.EUR.percent_change_1h)
       } else {
         dataClone.prices.data = dataClone.prices.data.sort((a, b) => a.quote.EUR.percent_change_1h > b.quote.EUR.percent_change_1h)
@@ -41,7 +41,9 @@ function App() {
       <button onClick={() => setloggedin(!loggedin)}>
         {loggedin ? " log out" : " login"}
       </button>
-      <form onSubmit={(e)=>  {
+      <br />
+
+      <form onSubmit={(e) => {
         e.preventDefault()
         const payload = {
           email: e.target.elements.email.value,
@@ -60,9 +62,39 @@ function App() {
             console.log(res);
           });
       }}>
-        <input type="email" placeholder="email" name="email"/>
-        <input type="password" placeholder="password" name="password"/>
-        <button type="submit">Login</button>
+        <div className={`input-group`}>
+          <span className="input-group-text">Register</span>
+          <input className={`form-control`} type="email" placeholder="email" name="email" />
+          <input className={`form-control`} type="password" placeholder="password" name="password" />
+          <button className={`btn btn-primary`} type="submit">Login</button>
+        </div>
+      </form>
+
+      <form onSubmit={(e) => {
+        e.preventDefault()
+        const payload = {
+          email: e.target.elements.email.value,
+          password: e.target.elements.password.value
+        }
+        console.log(payload)
+        fetch(`${process.env.REACT_APP_API}/login`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: {
+            "content-type": "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then((res) => {
+            console.log(res);
+          });
+      }}>
+        <div className={`input-group`}>
+          <span className="input-group-text">Login</span>
+          <input className={`form-control`} type="email" placeholder="email" name="email" />
+          <input className={`form-control`} type="password" placeholder="password" name="password" />
+          <button className={`btn btn-primary`} type="submit">Login</button>
+        </div>
       </form>
       <table class="table text-start">
         <thead>

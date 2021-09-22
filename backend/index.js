@@ -90,6 +90,25 @@ app.post("/register", async (req, res) => {
     });
   }
 })
+app.post("/login", async (req, res) => {
+  let userToLogin = await User.findOne({ email: req.body.email })
+  if (userToLogin) {
+    bcrypt.compare(req.body.password, userToLogin.password, function(err, bcryptRes) {
+      if (err){
+        console.error(err)
+      }
+      if (bcryptRes){
+        console.log(`Pw match`)
+        console.log(bcryptRes)
+      } else {
+        console.log(`Pw DO NOT match`)
+        return res.json({success: false, message: 'passwords do not match'});
+      }
+    });
+  } else {
+    res.json({ message: ` ${req.body.email} already registered` });
+  }
+})
 setInterval(async () => {
   const response = await getPricesFromAPI();
   const thresholds = await getSavedThresholds();
