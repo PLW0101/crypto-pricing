@@ -3,6 +3,7 @@ const express = require("express");
 var cors = require("cors"); // Since our frontend runs on a different port than the backend, we need to deactivate CORS on the server (here). Because of security this is usually blocked. Requests from eg. Facebook.com, should not go to google.com (could be risky)
 const axios = require("axios"); // Library to make HTTP request easier
 const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
 const saltRounds = 10;
 const app = express(); // Initatinate our express app
 const port = process.env.PORT || 8080; // When there is a environemnt variable called PORT - use it, otherwise fallback to 8080
@@ -19,11 +20,11 @@ const cryptoSchema = new mongoose.Schema({ // we define how our data looks like.
   price: Number // mongodb is strictly typed. Eg. if you try to save a price with the value "hello", mongo tells you that price should NOT bet a string, it should be a Number
 });
 const Crypto = mongoose.model('Crypto', cryptoSchema); //Instatinate the Model from the Schema. With this Object (Crypto) you will make your database transactions. Like: Crptyo.save(), Crypto.new(), Crypto.removeAll()
-const userSchema = new mongoose.Schema({ 
-  email: String, 
+const userSchema = new mongoose.Schema({
+  email: String,
   password: String
 });
-const User = mongoose.model('User', userSchema); 
+const User = mongoose.model('User', userSchema);
 // Middlewares - tell express to use certain libraries or configuration what you need for your app
 app.use(cors()); // Tell express to ignore the CORS security feature
 app.use(express.json()); //Used to parse JSON bodies
@@ -55,9 +56,16 @@ const getSavedThresholds = async () => {
 
 app.get("/prices", async (req, res) => { // define a get route with the /prices path: http://localhost:8080/prices
   try { // opens a try/catch block which helps us with handling errors gracefully
-    const response = await getPricesFromAPI();
-    const currencies = await getSavedThresholds();
-    res.json({ currencies: currencies, prices: response.data });
+    let token = req.headers.authorization
+    var decoded = jwt.verify(token, 'super_secure_hash_to_harden_the_token');
+    console.log(`The decoded token is`, decoded)
+    if (token !== "") {
+      const response = await getPricesFromAPI();
+      const currencies = await getSavedThresholds();
+      res.json({ currencies: currencies, prices: response.data });
+    } else {
+      res.json(`UNAUTHENTICATED`)
+    }
   } catch (error) { // when the try block fails, it catches the error and prints it in a structred way below in the catch block
     console.error(error);
     res.json(error); // return the error as json to the frontend to evtl. display it on the page
@@ -83,26 +91,29 @@ app.post("/register", async (req, res) => {
   if (userToRegister) {
     res.json({ message: ` ${req.body.email} already registered` });
   } else {
-      bcrypt.hash(req.body.password, saltRounds,async function(err, hash) {
-        // Store hash in your password DB.
-        await User.create({email: req.body.email, password: hash})
-        res.json({ message: `successfully saved ${req.body.email}` });
+    bcrypt.hash(req.body.password, saltRounds, async function (err, hash) {
+      // Store hash in your password DB.
+      await User.create({ email: req.body.email, password: hash })
+      res.json({ message: `successfully saved ${req.body.email}` });
     });
   }
 })
 app.post("/login", async (req, res) => {
   let userToLogin = await User.findOne({ email: req.body.email })
   if (userToLogin) {
-    bcrypt.compare(req.body.password, userToLogin.password, function(err, bcryptRes) {
-      if (err){
+    bcrypt.compare(req.body.password, userToLogin.password, function (err, bcryptRes) {
+      if (err) {
         console.error(err)
       }
-      if (bcryptRes){
+      if (bcryptRes) {
         console.log(`Pw match`)
-        console.log(bcryptRes)
+        var token = jwt.sign({ email: userToLogin.email }, 'super_secure_hash_to_harden_the_token');
+        console.log(`token`, token)
+        return res.json({ token });
+        // TODO generate a valid and fresh JWT token and respond it to the user
       } else {
         console.log(`Pw DO NOT match`)
-        return res.json({success: false, message: 'passwords do not match'});
+        return res.json({ success: false, message: 'passwords do not match' });
       }
     });
   } else {

@@ -5,11 +5,20 @@ function App() {
   const [data, setdata] = useState({});
   const [loggedin, setloggedin] = useState(false);
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API}/prices`) //async
-      .then((res) => res.json())
-      .then((res) => {
-        setdata(res);
-      });
+    const existingToken = localStorage.getItem('crypto-token')
+    if(existingToken){
+      fetch(`${process.env.REACT_APP_API}/prices`, {
+        headers: {
+          "Authorization": existingToken
+        }
+      }) //async
+        .then((res) => res.json())
+        .then((res) => {
+          setdata(res);
+        });
+    } else {
+      console.log("not logged in")
+    }
   }, []);
   const sortBy = (e) => {
     const columnName = e.target.innerText
@@ -87,6 +96,10 @@ function App() {
           .then((res) => res.json())
           .then((res) => {
             console.log(res);
+            //TODO receive valid and fresh JWT token and save it in the localStorage
+            if(res.token){
+              localStorage.setItem("crypto-token", res.token)
+            }
           });
       }}>
         <div className={`input-group`}>
