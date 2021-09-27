@@ -1,6 +1,12 @@
 import "./App.css";
 import React, { useEffect, useState } from "react"; // import state and effekt hooks
-
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link
+} from "react-router-dom";
+import CryptoPricingTable from "./CryptoPricingTable";
 function App() {
   const [data, setdata] = useState({});
   const potentialToken = localStorage.getItem('crypto-token')
@@ -47,146 +53,121 @@ function App() {
   }
   return (
     <div className="App">
-      Hello {loggedin ? <button className="btn btn-danger" onClick={() => {
-        setloggedin(false)
-        localStorage.removeItem("crypto-token")
-        }}>
-        {loggedin ? " log out" : " login"}
-      </button> : " you are logged out"}
-      
-      <br />
-      {!loggedin ? (
-        <>
-          <form onSubmit={(e) => {
-            e.preventDefault()
-            const payload = {
-              email: e.target.elements.email.value,
-              password: e.target.elements.password.value
-            }
-            console.log(payload)
-            fetch(`${process.env.REACT_APP_API}/register`, {
-              method: "POST",
-              body: JSON.stringify(payload),
-              headers: {
-                "content-type": "application/json",
-              },
-            })
-              .then((res) => res.json())
-              .then((res) => {
-                console.log(res);
-              });
-          }}>
-            <div className={`input-group`}>
-              <span className="input-group-text">Register</span>
-              <input className={`form-control`} type="email" placeholder="email" name="email" />
-              <input className={`form-control`} type="password" placeholder="password" name="password" />
-              <button className={`btn btn-primary`} type="submit">Register</button>
-            </div>
-          </form>
+      <Router>
+        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+          <div className="container-fluid">
 
-          <form onSubmit={(e) => {
-            e.preventDefault()
-            const payload = {
-              email: e.target.elements.email.value,
-              password: e.target.elements.password.value
-            }
-            console.log(payload)
-            fetch(`${process.env.REACT_APP_API}/login`, {
-              method: "POST",
-              body: JSON.stringify(payload),
-              headers: {
-                "content-type": "application/json",
-              },
-            })
-              .then((res) => res.json())
-              .then((res) => {
-                console.log(res);
-                if (res.token) { // if the backend issued successfully a token, save it locally in the browser (localStorage, or cookie or whatever)
-                  localStorage.setItem("crypto-token", res.token)
-                  setloggedin(true)
-
-                }
-              });
-          }}>
-            <div className={`input-group`}>
-              <span className="input-group-text">Login</span>
-              <input className={`form-control`} type="email" placeholder="email" name="email" />
-              <input className={`form-control`} type="password" placeholder="password" name="password" />
-              <button className={`btn btn-primary`} type="submit">Login</button>
+            <Link className="navbar-brand" to="/">Crypto price alert bot</Link>
+            <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+              <span className="navbar-toggler-icon"></span>
+            </button>
+            <div className="collapse navbar-collapse" id="navbarNav">
+              <ul className="navbar-nav">
+                <li className="nav-item">
+                  <Link className="nav-link" to="/prices">Prices</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/about">About</Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/history">History</Link>
+                </li>
+              </ul>
             </div>
-          </form>
-      </>
-    ) : (
-      <table class="table text-start">
-        <thead>
-          <tr>
-            <th onClick={(e) => sortBy(e)} scope="col">Currency</th>
-            <th onClick={(e) => sortBy(e)} scope="col">Price</th>
-            <th onClick={(e) => sortBy(e)} scope="col">Growth</th>
-            <th onClick={(e) => sortBy(e)} scope="col">Threshold</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.prices &&
-            data.prices.data.map((currency) => (
-              <tr>
-                <th scope="row">{currency.name}</th>
-                <td>
-                  <code>{currency.quote.EUR.price.toFixed(5)}</code>
-                </td>
-                <td>
-                  <code>{currency.quote.EUR.percent_change_1h.toFixed(2)}%</code>
-                </td>
-                <td>
-                  <form
-                    className={`d-flex`}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      console.log(e.target.elements[0].value);
-                      //TODO perform a post request to a new backend endpoint
-                      fetch(`${process.env.REACT_APP_API}/setthreshhold`, {
-                        method: "POST",
-                        body: JSON.stringify({
-                          currency: currency.name,
-                          value: e.target.elements[0].value,
-                        }),
-                        headers: {
-                          "content-type": "application/json",
-                        },
-                      })
-                      .then((res) => res.json())
-                      .then((res) => {
-                          console.log(res);
-                        });
-                      }}
-                  >
-                    <div className="input-group mb-3">
-                      <span className="input-group-text">EUR</span>
-                      <input
-                        type="text"
-                        className="form-control"
-                        defaultValue={
-                          data.currencies.find(
-                            (c) => c.name === currency.name
-                          )
-                          ? data.currencies.find(
-                              (c) => c.name === currency.name
-                              ).price
-                            : 0
-                          }
-                          aria-label="Amount (to the nearest dollar)"
-                      />
-                      <button className={`btn btn-success`} type="submit">
-                        Save
-                      </button>
-                    </div>
-                  </form>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
-    )}
+            <span class="navbar-text">
+              Hello {loggedin ? <button className="btn btn-danger" onClick={() => {
+                setloggedin(false)
+                localStorage.removeItem("crypto-token")
+              }}>
+                {loggedin ? " log out" : " login"}
+              </button> : " you are logged out"}
+            </span>
+          </div>
+        </nav>
+
+        <Switch>
+          <Route path="/about">
+            About
+          </Route>
+          <Route path="/history">
+            History
+          </Route>
+          <Route path="/prices">
+            {!loggedin ? (
+              <>
+                <form onSubmit={(e) => {
+                  e.preventDefault()
+                  const payload = {
+                    email: e.target.elements.email.value,
+                    password: e.target.elements.password.value
+                  }
+                  console.log(payload)
+                  fetch(`${process.env.REACT_APP_API}/register`, {
+                    method: "POST",
+                    body: JSON.stringify(payload),
+                    headers: {
+                      "content-type": "application/json",
+                    },
+                  })
+                    .then((res) => res.json())
+                    .then((res) => {
+                      console.log(res);
+                    });
+                }}>
+                  <div className={`input-group`}>
+                    <span className="input-group-text">Register</span>
+                    <input className={`form-control`} type="email" placeholder="email" name="email" />
+                    <input className={`form-control`} type="password" placeholder="password" name="password" />
+                    <button className={`btn btn-primary`} type="submit">Register</button>
+                  </div>
+                </form>
+
+                <form onSubmit={(e) => {
+                  e.preventDefault()
+                  const payload = {
+                    email: e.target.elements.email.value,
+                    password: e.target.elements.password.value
+                  }
+                  console.log(payload)
+                  fetch(`${process.env.REACT_APP_API}/login`, {
+                    method: "POST",
+                    body: JSON.stringify(payload),
+                    headers: {
+                      "content-type": "application/json",
+                    },
+                  })
+                    .then((res) => res.json())
+                    .then((res) => {
+                      console.log(res);
+                      if (res.token) { // if the backend issued successfully a token, save it locally in the browser (localStorage, or cookie or whatever)
+                        localStorage.setItem("crypto-token", res.token)
+                        setloggedin(true)
+
+                      }
+                    });
+                }}>
+                  <div className={`input-group`}>
+                    <span className="input-group-text">Login</span>
+                    <input className={`form-control`} type="email" placeholder="email" name="email" />
+                    <input className={`form-control`} type="password" placeholder="password" name="password" />
+                    <button className={`btn btn-primary`} type="submit">Login</button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <CryptoPricingTable
+                sortBy={sortBy}
+                data={data}
+
+              />
+            )}
+          </Route>
+          <Route path="/">
+            Welcome
+          </Route>
+        </Switch>
+        <br />
+      </Router>
     </div>
   );
 }
