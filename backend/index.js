@@ -25,6 +25,15 @@ const userSchema = new mongoose.Schema({
   password: String
 });
 const User = mongoose.model('User', userSchema);
+const historicalCryptoSchema = new mongoose.Schema({ // we define how our data looks like. Like a blueprint (Schema) you define which fields you want to have and what type they gonna be
+  date: Date,
+  currencies: [{
+    name: String, // other datatypes could be Boolean, Float, Date, Geospital
+    price: Number // mongodb is strictly typed. Eg. if you try to save a price with the value "hello", mongo tells you that price should NOT bet a string, it should be a Number
+  }]
+});
+const HistoricCryptos = mongoose.model('HistoricCryptos', historicalCryptoSchema); 
+
 // Middlewares - tell express to use certain libraries or configuration what you need for your app
 app.use(cors()); // Tell express to ignore the CORS security feature
 app.use(express.json()); //Used to parse JSON bodies
@@ -122,6 +131,10 @@ app.post("/login", async (req, res) => {
 })
 setInterval(async () => {
   const response = await getPricesFromAPI();
+  await HistoricCryptos.create({
+    date: Date.now(),
+    currencies: response.data.data.map(c => ({name: c.name, price: c.quote.EUR.price}))
+  })
   const thresholds = await getSavedThresholds();
   thresholds.map(async (localSavedCurrency) => {
     const cryptoToCompare = response.data.data.find(
