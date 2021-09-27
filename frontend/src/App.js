@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react"; // import state and effekt h
 
 function App() {
   const [data, setdata] = useState({});
-  const [loggedin, setloggedin] = useState(false);
+  const potentialToken = localStorage.getItem('crypto-token')
+  const [loggedin, setloggedin] = useState(potentialToken && potentialToken !== "" ? true : false);
   useEffect(() => {
     const existingToken = localStorage.getItem('crypto-token') // check if there is a token, because /prices is a protected endpoint and should not be queried if you are not logged in (no token present)
     if (existingToken && loggedin) { // jjust fetch to the protected endpoint if we are logged in
@@ -46,8 +47,9 @@ function App() {
   }
   return (
     <div className="App">
-      Hello {loggedin ? -<button onClick={() => {
+      Hello {loggedin ? <button className="btn btn-danger" onClick={() => {
         setloggedin(false)
+        localStorage.removeItem("crypto-token")
         }}>
         {loggedin ? " log out" : " login"}
       </button> : " you are logged out"}
