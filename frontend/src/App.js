@@ -6,7 +6,7 @@ function App() {
   const [loggedin, setloggedin] = useState(false);
   useEffect(() => {
     const existingToken = localStorage.getItem('crypto-token') // check if there is a token, because /prices is a protected endpoint and should not be queried if you are not logged in (no token present)
-    if(existingToken){ // jjust fetch to the protected endpoint if we are logged in
+    if (existingToken && loggedin) { // jjust fetch to the protected endpoint if we are logged in
       fetch(`${process.env.REACT_APP_API}/prices`, {
         headers: {
           "Authorization": existingToken // since the backend is expecting a authenticated request, we have to provide the fetch with a authorization header
@@ -19,7 +19,7 @@ function App() {
     } else {
       console.log("not logged in")
     }
-  }, []);
+  }, [loggedin]);
   const sortBy = (e) => {
     const columnName = e.target.innerText
     let dataClone = { ...data }
@@ -46,68 +46,75 @@ function App() {
   }
   return (
     <div className="App">
-      Hello you are {loggedin ? " logged in" : " logged out"}
-      <button onClick={() => setloggedin(!loggedin)}>
+      Hello {loggedin ? -<button onClick={() => {
+        setloggedin(false)
+        }}>
         {loggedin ? " log out" : " login"}
-      </button>
+      </button> : " you are logged out"}
+      
       <br />
-
-      <form onSubmit={(e) => {
-        e.preventDefault()
-        const payload = {
-          email: e.target.elements.email.value,
-          password: e.target.elements.password.value
-        }
-        console.log(payload)
-        fetch(`${process.env.REACT_APP_API}/register`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: {
-            "content-type": "application/json",
-          },
-        })
-          .then((res) => res.json())
-          .then((res) => {
-            console.log(res);
-          });
-      }}>
-        <div className={`input-group`}>
-          <span className="input-group-text">Register</span>
-          <input className={`form-control`} type="email" placeholder="email" name="email" />
-          <input className={`form-control`} type="password" placeholder="password" name="password" />
-          <button className={`btn btn-primary`} type="submit">Login</button>
-        </div>
-      </form>
-
-      <form onSubmit={(e) => {
-        e.preventDefault()
-        const payload = {
-          email: e.target.elements.email.value,
-          password: e.target.elements.password.value
-        }
-        console.log(payload)
-        fetch(`${process.env.REACT_APP_API}/login`, {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: {
-            "content-type": "application/json",
-          },
-        })
-          .then((res) => res.json())
-          .then((res) => {
-            console.log(res);
-            if(res.token){ // if the backend issued successfully a token, save it locally in the browser (localStorage, or cookie or whatever)
-              localStorage.setItem("crypto-token", res.token)
+      {!loggedin ? (
+        <>
+          <form onSubmit={(e) => {
+            e.preventDefault()
+            const payload = {
+              email: e.target.elements.email.value,
+              password: e.target.elements.password.value
             }
-          });
-      }}>
-        <div className={`input-group`}>
-          <span className="input-group-text">Login</span>
-          <input className={`form-control`} type="email" placeholder="email" name="email" />
-          <input className={`form-control`} type="password" placeholder="password" name="password" />
-          <button className={`btn btn-primary`} type="submit">Login</button>
-        </div>
-      </form>
+            console.log(payload)
+            fetch(`${process.env.REACT_APP_API}/register`, {
+              method: "POST",
+              body: JSON.stringify(payload),
+              headers: {
+                "content-type": "application/json",
+              },
+            })
+              .then((res) => res.json())
+              .then((res) => {
+                console.log(res);
+              });
+          }}>
+            <div className={`input-group`}>
+              <span className="input-group-text">Register</span>
+              <input className={`form-control`} type="email" placeholder="email" name="email" />
+              <input className={`form-control`} type="password" placeholder="password" name="password" />
+              <button className={`btn btn-primary`} type="submit">Register</button>
+            </div>
+          </form>
+
+          <form onSubmit={(e) => {
+            e.preventDefault()
+            const payload = {
+              email: e.target.elements.email.value,
+              password: e.target.elements.password.value
+            }
+            console.log(payload)
+            fetch(`${process.env.REACT_APP_API}/login`, {
+              method: "POST",
+              body: JSON.stringify(payload),
+              headers: {
+                "content-type": "application/json",
+              },
+            })
+              .then((res) => res.json())
+              .then((res) => {
+                console.log(res);
+                if (res.token) { // if the backend issued successfully a token, save it locally in the browser (localStorage, or cookie or whatever)
+                  localStorage.setItem("crypto-token", res.token)
+                  setloggedin(true)
+
+                }
+              });
+          }}>
+            <div className={`input-group`}>
+              <span className="input-group-text">Login</span>
+              <input className={`form-control`} type="email" placeholder="email" name="email" />
+              <input className={`form-control`} type="password" placeholder="password" name="password" />
+              <button className={`btn btn-primary`} type="submit">Login</button>
+            </div>
+          </form>
+      </>
+    ) : (
       <table class="table text-start">
         <thead>
           <tr>
@@ -145,11 +152,11 @@ function App() {
                           "content-type": "application/json",
                         },
                       })
-                        .then((res) => res.json())
-                        .then((res) => {
+                      .then((res) => res.json())
+                      .then((res) => {
                           console.log(res);
                         });
-                    }}
+                      }}
                   >
                     <div className="input-group mb-3">
                       <span className="input-group-text">EUR</span>
@@ -160,12 +167,12 @@ function App() {
                           data.currencies.find(
                             (c) => c.name === currency.name
                           )
-                            ? data.currencies.find(
+                          ? data.currencies.find(
                               (c) => c.name === currency.name
-                            ).price
+                              ).price
                             : 0
-                        }
-                        aria-label="Amount (to the nearest dollar)"
+                          }
+                          aria-label="Amount (to the nearest dollar)"
                       />
                       <button className={`btn btn-success`} type="submit">
                         Save
@@ -177,6 +184,7 @@ function App() {
             ))}
         </tbody>
       </table>
+    )}
     </div>
   );
 }
