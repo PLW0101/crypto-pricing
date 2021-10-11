@@ -1,4 +1,9 @@
 require("dotenv").config(); // use enviroment variables coming from a .env file. We use this to hide sensible information in the code which would be otherwise exposed to github. We can then use them with process.env.VARIABLE_NAME
+const key = 'qGBPWsu4YOtu+jSqHsTBfjj0bLW+FML48ZyjF1BG5vy5VAicyzWEx7Lz'; // API Key
+const secret = '1xyb8Y5Wdoqm8N51IZkD+GTyVD2yEXEAAEA3OjQ0ekwb85870j0sKebvHONc2nK7gL2Wd5S/kiKT2N7mgH3+ZA=='; // API Private Key
+const KrakenClient = require('kraken-api');
+const kraken = new KrakenClient(key, secret);
+
 const express = require("express");
 var cors = require("cors"); // Since our frontend runs on a different port than the backend, we need to deactivate CORS on the server (here). Because of security this is usually blocked. Requests from eg. Facebook.com, should not go to google.com (could be risky)
 const axios = require("axios"); // Library to make HTTP request easier
@@ -32,7 +37,7 @@ const historicalCryptoSchema = new mongoose.Schema({ // we define how our data l
     price: Number // mongodb is strictly typed. Eg. if you try to save a price with the value "hello", mongo tells you that price should NOT bet a string, it should be a Number
   }]
 });
-const HistoricCryptos = mongoose.model('HistoricCryptos', historicalCryptoSchema); 
+const HistoricCryptos = mongoose.model('HistoricCryptos', historicalCryptoSchema);
 
 // Middlewares - tell express to use certain libraries or configuration what you need for your app
 app.use(cors()); // Tell express to ignore the CORS security feature
@@ -133,18 +138,30 @@ setInterval(async () => {
   const response = await getPricesFromAPI();
   await HistoricCryptos.create({
     date: Date.now(),
-    currencies: response.data.data.map(c => ({name: c.name, price: c.quote.EUR.price}))
+    currencies: response.data.data.map(c => ({ name: c.name, price: c.quote.EUR.price }))
   })
   const thresholds = await getSavedThresholds();
   thresholds.map(async (localSavedCurrency) => {
     const cryptoToCompare = response.data.data.find(
       (apiCurr) => localSavedCurrency.name === apiCurr.name
     );
-    if (cryptoToCompare.quote.EUR.price < Number(localSavedCurrency.price)) {
+    if (cryptoToCompare.quote.EUR.price < Number(localSavedCurrency.price)) { //TODO make two thresholds, to check if you want to sell of buy
       console.log(localSavedCurrency.name + " you shall buy now!!!!");
       try {
         const response = await axios.post(
           `https://api.telegram.org/${process.env.TELEGRAM_API_KEY}/sendMessage`, { chat_id: process.env.CHAT_ID, text: localSavedCurrency.currency + " you shall buy now!!!!" });
+
+        var value = await kraken.api('AddOrder', {
+          pair: 'XDGEUR', //TODO sell or buy the crypto-fiat pair which is in the threshold => ETHEUR, EURETH, EURBT, EURDG
+          type: "sell", // TODO if under threshold buy, if over sell
+          ordertype: 'limit',
+          volume: 50, // TODO if the threshold is super under - buy a lot. If its over sell a lot. Calculate how much of the crypto you want to sell/buy
+          price: 0.20, // TODO adjust  the price 
+          validate: true // TODO remove for REAL trading
+        });
+
+        var arrays = JSON.stringify(value);
+        console.log(arrays);
 
       } catch (error) {
         console.log(error)
